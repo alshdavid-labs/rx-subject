@@ -4,14 +4,13 @@ export class Subject {
     }
 
     subscribe(cb) {
-        let subscription = {
-            callback: cb,
-            unsubscribe: () => {
-                subscription.callback = null
-                this.cleanup()
-            }
+        this.subscribers.push({})
+        let subscription = this.subscribers[this.subscribers.length - 1]
+        subscription.callback = cb
+        subscription.unsubscribe = () => {
+            subscription.callback = null
+            this.cleanup()
         }
-        this.subscribers.push(subscription)
         return subscription
     }
 
@@ -22,8 +21,11 @@ export class Subject {
     }
 
     cleanup() {
-        this.subscribers = this.subscribers.filter(
-            sub => (sub.callback ? sub.callback : null)
-        )
+        for (let i; i < this.subscribers.length; i++) {
+            if (!this.subscribers[i].callback) {
+                this.subscribers[i] = null
+                this.subscribers.splice(i, 1)
+            }
+        }
     }
 }
